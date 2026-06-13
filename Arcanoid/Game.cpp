@@ -109,23 +109,14 @@ void Game::update(float deltaTime) {
 }
 
 void Game::handleBlockCollisions() {
-    for (Block& block : blocks) {
-        if (block.isDestroyed()) {
+    for (auto& block : blocks) {
+        if (block->isDestroyed()) {
             continue;
         }
 
-        if (ball.getBounds().intersects(block.getBounds())) {
-            if (block.containsBonus())
-            {
-                sf::FloatRect bounds = block.getBounds();
-                bonuses.emplace_back(bounds.left + bounds.width / 2.0f, bounds.top + bounds.height);
-            }
-            block.hit();
+        if (ball.getBounds().intersects(block->getBounds())) {
+            block->onHit(ball, bonuses);
             score++;
-            if (block.isSpeedUp())
-            {
-                ball.increaseSpeed(1.15f);
-            }
             ball.reflectY();
             return;
         }
@@ -134,23 +125,32 @@ void Game::handleBlockCollisions() {
 
 void Game::updateBonuses(float deltaTime)
 {
-    for (Bonus& bonus : bonuses)
+    for (auto& bonus : bonuses)
     {
-        if (!bonus.isActive())
+        if (!bonus->isActive())
         {
             continue;
         }
 
-        bonus.update(deltaTime);
+        bonus->update(deltaTime);
 
-        if (bonus.getBounds().intersects(paddle.getBounds()))
+        if (bonus->getBounds().intersects(paddle.getBounds()))
         {
-            paddle.changeWidth(1.25f);
-            bottomShield = true;
-            ball.randomizeDirection();
-            bonus.deactivate();
+            bonus->apply(paddle, ball, bottomShield);
+            bonus->deactivate();
         }
     }
+
+    bonuses.erase(
+        std::remove_if(
+            bonuses.begin(),
+            bonuses.end(),
+            [](const std::unique_ptr<Bonus>& bonus) {
+                return !bonus->isActive();
+            }
+        ),
+        bonuses.end()
+    );
 }
 
 void Game::handleWallCollisions() {
@@ -190,16 +190,16 @@ void Game::resetBall() {
 void Game::render() {
     window.clear(sf::Color::Black);
 
-    for (const Block& block : blocks) {
-        block.draw(window);
+    for (const auto& block : blocks) {
+        block->draw(window);
     }
 
     ball.draw(window);
     paddle.draw(window);
 
-    for (const Bonus& bonus : bonuses)
+    for (const auto& bonus : bonuses)
     {
-        bonus.draw(window);
+        bonus->draw(window);
     }
 
     window.display();
