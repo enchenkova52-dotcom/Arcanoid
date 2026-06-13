@@ -1,67 +1,27 @@
 #include "Block.h"
+#include "Ball.h"
+#include "Bonus.h"
 
-Block::Block(
-    float x,
-    float y,
-    float width,
-    float height,
-    int hp,
-    bool solid,
-    bool speed,
-    bool bonus
-)
+Block::Block(float x, float y, float width, float height, int hp)
+    : destroyed(false), health(hp)
 {
     shape.setSize(sf::Vector2f(width, height));
     shape.setPosition(x, y);
-    shape.setOutlineThickness(1);
-    shape.setOutlineColor(sf::Color::White);
-
-    destroyed = false;
-    health = hp;
-    unbreakable = solid;
-    speedUp = speed;
-    hasBonus = bonus;
-
-    if (unbreakable)
-    {
-        shape.setFillColor(sf::Color(120, 120, 120));
-    }
-    else if (speedUp)
-    {
-        shape.setFillColor(sf::Color(255, 20, 147));
-    }
-    else
-    {
-        shape.setFillColor(sf::Color(255, 105, 180));
-    }
+    shape.setFillColor(sf::Color::Yellow);
 }
 
-void Block::hit()
+void Block::onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses)
 {
-    if (unbreakable)
-    {
-        return;
-    }
-
     health--;
 
-    if (health == 1)
-    {
-        shape.setFillColor(sf::Color(255, 180, 220));
-    }
-
-    if (health <= 0)
-    {
+    if (health <= 0) {
         destroyed = true;
     }
 }
 
 void Block::draw(sf::RenderWindow& window) const
 {
-    if (!destroyed)
-    {
-        window.draw(shape);
-    }
+    window.draw(shape);
 }
 
 sf::FloatRect Block::getBounds() const
@@ -74,16 +34,45 @@ bool Block::isDestroyed() const
     return destroyed;
 }
 
-bool Block::isUnbreakable() const
+UnbreakableBlock::UnbreakableBlock(float x, float y, float width, float height)
+    : Block(x, y, width, height, 1)
 {
-    return unbreakable;
+    shape.setFillColor(sf::Color(120, 120, 120));
 }
 
-bool Block::isSpeedUp() const
+void UnbreakableBlock::onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses)
 {
-    return speedUp;
+    // Неразрушаемый блок ничего не теряет при ударе
 }
-bool Block::containsBonus() const
+
+SpeedUpBlock::SpeedUpBlock(float x, float y, float width, float height)
+    : Block(x, y, width, height, 1)
 {
-    return hasBonus;
+    shape.setFillColor(sf::Color::Red);
+}
+
+void SpeedUpBlock::onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses)
+{
+    ball.increaseSpeed(1.15f);
+    destroyed = true;
+}
+
+BonusBlock::BonusBlock(float x, float y, float width, float height)
+    : Block(x, y, width, height, 1)
+{
+    shape.setFillColor(sf::Color::Blue);
+}
+
+void BonusBlock::onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses)
+{
+    sf::FloatRect bounds = shape.getGlobalBounds();
+
+    bonuses.push_back(
+        std::make_unique<PaddleSizeBonus>(
+            bounds.left + bounds.width / 2.0f,
+            bounds.top + bounds.height
+        )
+    );
+
+    destroyed = true;
 }
