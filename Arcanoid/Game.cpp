@@ -1,6 +1,10 @@
 #include "Game.h"
 #include "Constants.h"
+#include "Block.h"
+#include "Bonus.h"
 #include <iostream>
+#include <algorithm>
+#include <memory>
 
 Game::Game()
     : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Arcanoid"),
@@ -27,25 +31,32 @@ void Game::run() {
 }
 
 void Game::createBlocks() {
-    const int rows = 4;
-    const int cols = 10;
+    constexpr int rows = 4;
+    constexpr int cols = 10;
 
-    const float blockWidth = 70.0f;
-    const float blockHeight = 25.0f;
-    const float startX = 35.0f;
-    const float startY = 50.0f;
-    const float gap = 5.0f;
+    constexpr float blockWidth = 70.0f;
+    constexpr float blockHeight = 25.0f;
+    constexpr float startX = 35.0f;
+    constexpr float startY = 50.0f;
+    constexpr float gap = 5.0f;
 
     for (int row = 0; row < rows; ++row) {
         for (int col = 0; col < cols; ++col) {
             float x = startX + col * (blockWidth + gap);
             float y = startY + row * (blockHeight + gap);
 
-            bool solid = (row == 0);
-            bool speed = (row == 1 || row == 2) && (col % 2 == 0);
-            bool bonus = (row == 3 && col % 3 == 0);
-
-            blocks.emplace_back(x, y, blockWidth, blockHeight, 2, solid, speed, bonus);
+            if (row == 0) {
+                blocks.push_back(std::make_unique<UnbreakableBlock>(x, y, blockWidth, blockHeight));
+            }
+            else if ((row == 1 || row == 2) && col % 2 == 0) {
+                blocks.push_back(std::make_unique<SpeedUpBlock>(x, y, blockWidth, blockHeight));
+            }
+            else if (row == 3 && col % 3 == 0) {
+                blocks.push_back(std::make_unique<BonusBlock>(x, y, blockWidth, blockHeight));
+            }
+            else {
+                blocks.push_back(std::make_unique<Block>(x, y, blockWidth, blockHeight, 2));
+            }
         }
     }
 }
