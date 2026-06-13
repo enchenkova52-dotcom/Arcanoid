@@ -27,20 +27,17 @@ public:
 class UnbreakableBlock : public Block {
 public:
     UnbreakableBlock(float x, float y, float width, float height);
-
     void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses) override;
 };
 
 class SpeedUpBlock : public Block {
 public:
     SpeedUpBlock(float x, float y, float width, float height);
-
     void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses) override;
 };
 
 class BonusBlock : public Block {
 public:
     BonusBlock(float x, float y, float width, float height);
-
     void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses) override;
 };
