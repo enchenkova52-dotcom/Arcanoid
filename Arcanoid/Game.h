@@ -13,7 +13,7 @@ private:
     sf::RenderWindow window;
     Ball ball;
     Paddle paddle;
-    std::vector<Block> blocks;
+    std::vector<std::unique_ptr<Block>> blocks;
     std::vector<std::unique_ptr<Bonus>> bonuses;
 
     void updateBonuses(float deltaTime);
