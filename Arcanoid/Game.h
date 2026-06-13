@@ -6,6 +6,7 @@
 #include <vector>
 #include "Block.h"
 #include "Bonus.h"
+#include <memory>
 
 class Game {
 private:
@@ -13,7 +14,7 @@ private:
     Ball ball;
     Paddle paddle;
     std::vector<Block> blocks;
-    std::vector<Bonus> bonuses;
+    std::vector<std::unique_ptr<Bonus>> bonuses;
 
     void updateBonuses(float deltaTime);
    
