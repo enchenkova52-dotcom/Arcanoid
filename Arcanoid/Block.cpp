@@ -42,7 +42,7 @@ UnbreakableBlock::UnbreakableBlock(float x, float y, float width, float height)
 
 void UnbreakableBlock::onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses)
 {
-    // Неразрушаемый блок ничего не теряет при ударе
+    // Неразрушаемый блок не теряет здоровье
 }
 
 SpeedUpBlock::SpeedUpBlock(float x, float y, float width, float height)
