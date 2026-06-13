@@ -1,41 +1,46 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <memory>
+
+class Ball;
+class Bonus;
 
 class Block {
-private:
+protected:
     sf::RectangleShape shape;
-
     bool destroyed;
-    bool unbreakable;
-    bool speedUp;
-    bool hasBonus;
-
     int health;
 
 public:
-    Block(
-        float x,
-        float y,
-        float width,
-        float height,
-        int hp,
-        bool solid,
-        bool speed,
-        bool bonus
-    );
+    Block(float x, float y, float width, float height, int hp);
+    virtual ~Block() = default;
 
-    void hit();
+    virtual void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses);
 
     void draw(sf::RenderWindow& window) const;
-
     sf::FloatRect getBounds() const;
-
     bool isDestroyed() const;
+};
 
-    bool isUnbreakable() const;
+class UnbreakableBlock : public Block {
+public:
+    UnbreakableBlock(float x, float y, float width, float height);
 
-    bool isSpeedUp() const;
+    void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses) override;
+};
 
-    bool containsBonus() const;
+class SpeedUpBlock : public Block {
+public:
+    SpeedUpBlock(float x, float y, float width, float height);
+
+    void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses) override;
+};
+
+class BonusBlock : public Block {
+public:
+    BonusBlock(float x, float y, float width, float height);
+
+    void onHit(Ball& ball, std::vector<std::unique_ptr<Bonus>>& bonuses) override;
 };
